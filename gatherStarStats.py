@@ -1,11 +1,20 @@
+import pandas as pd
 from astroquery.simbad import Simbad
 from astropy import units as u
 from astropy.coordinates import SkyCoord
+
+# List of targets that need ID's and Reference Stars
+targetList = "C:\\Users\\conno\\Downloads\\VariableStarsTargets_TargetCommons.csv"
+
+df=pd.read_csv(targetList)
+print(df)
 
 simbad = Simbad()
 simbad.add_votable_fields('ids')
 simbad.add_votable_fields('otype')
 simbad.add_votable_fields('flux(V)')
+
+
 
 
 varStar = "HIP 1213"
@@ -50,7 +59,7 @@ def getPotentialReferences(coordinates):
 
 # Selects a catalog number from a list of catalogs an object belongs to
 # Hierarchy:
-# HD -> HIP -> HIC -> 2MASS
+# HD -> HIP -> HIC -> 2MASS -> User-Given ID
 
 def selectCatalog(catalogs):
     
