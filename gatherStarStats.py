@@ -132,7 +132,7 @@ refEpochs = []
 refMagsV = []
 
 
-
+comp = 2
 for target in commonVarNames:
 
      # Finds the coordinates of a given variable star
@@ -178,6 +178,37 @@ for target in commonVarNames:
                refDecas.append(refSplitDec[2])
                refEpochs.append("J2000")
                refMagsV.append(refMagV)
+
+               if(refIDs[len(refIDs)-1] == refIDs[len(refIDs)-comp] and len(refIDs) > 1):
+                    print("Duplicate")
+                    varIDs.pop()
+                    varIDsConv.pop()
+                    refIDs.pop()
+                    refIDsConv.pop()
+                    refRAh.pop()
+                    refRAm.pop()
+                    refRAs.pop()
+                    refDecd.pop()
+                    refDecam.pop()
+                    refDecas.pop()
+                    refEpochs.pop()
+                    refMagsV.pop()
+
+                    varIDs.append("--")
+                    varIDsConv.append("--")
+                    refIDs.append("--")
+                    refIDsConv.append("--")
+                    refRAh.append("--")
+                    refRAm.append("--")
+                    refRAs.append("--")
+                    refDecd.append("--")
+                    refDecam.append("--")
+                    refDecas.append("--")
+                    refEpochs.append("--")
+                    refMagsV.append("--")
+                    comp += 1
+               else:
+                    comp = 2
           
           else:
                # Populates the current row with current target's info
