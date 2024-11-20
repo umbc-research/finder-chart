@@ -42,8 +42,10 @@ def getStarData(star=None):
           return ra, dec, catalogNum, catalogNumConv, magnitudeV # Returns RA and Dec in decimal degrees
 
 # Uses simbad.query_region() to find stars that could be used as references within the same frame (+-1 magnitude ideally)
-def getPotentialReferences(coordinates):
+def getPotentialReferences(ra, dec):
           
+     coordinates = SkyCoord(ra, dec, frame="icrs", unit=(u.hourangle, u.deg))
+
      potentialRef=simbad.query_region(coordinates, radius="0d6m")
      
      star_results = potentialRef[potentialRef['OTYPE'] == 'Star']
@@ -75,11 +77,25 @@ def selectCatalog(catalogs):
 # Separates hh mm and ss or deg ' and '' from one string into three strings
 def extractAngle(coordinates):
      coordSeparated = [ang.strip() for ang in coordinates.split(' ')]
+
      # Removes "+" from Dec degrees (Prevents equations in Google Sheets)
      decSoln = coordSeparated[0].replace("+", "")
-     print(coordSeparated)
-     return decSoln, coordSeparated[1], coordSeparated[2]
 
+     if len(coordSeparated) == 3:
+          return decSoln, coordSeparated[1], coordSeparated[2]
+     else:
+          return None, None, None
+
+def isTargetUsable(star):
+     starRA = extractAngle(star["RA"])
+     starDec = extractAngle(star["DEC"])
+     #print("In isTargetUsable")
+     #print(starRA)
+     #print(starDec)
+     if(starRA[0] == None or starRA[1] == None or starRA[2] == None or starDec[0] == None or starDec[1] == None or starDec[2] == None or star["FLUX_V"] == None):
+          print(f"{star['MAIN_ID']} is not usable")
+          return False
+     return True
 
 # List of targets that need ID's and Reference Stars
 targetList = "C:\\Users\\conno\\Downloads\\VariableStarsTargets_TargetCommons.csv"
@@ -120,37 +136,34 @@ refMagsV = []
 for target in commonVarNames:
 
      # Finds the coordinates of a given variable star
-
-     #varRA, varDec, varID, varIDConv, varMagV  = getStarData(varStar if varStar else None)
      varRA, varDec, varID, varIDConv, varMagV  = getStarData(target if target else None)
 
      if(varRA != None and varDec != None):
-
-          originCoords = SkyCoord(varRA, varDec, frame="icrs", unit=(u.hourangle, u.deg))
-
-          if(originCoords!=None and varID!=None):
-
-     #    print(varRA)
-     #    print(varDec)
-     #    print(varID)
-     #    print(varIDConv)
-     #    print(varMagV)
+          if(varID!=None):
 
                refComp = 100
-               references = getPotentialReferences(originCoords)
+               references = getPotentialReferences(varRA,varDec)
                if references is not None:
-                    #for row in references:
-                         #print(f"MAIN_ID: {row['MAIN_ID']}, FLUX_V: {row['FLUX_V']}")        
-                         for row in references:
-                              if abs(varMagV-row['FLUX_V']) < refComp:
+                    for row in references:
+                         if abs(varMagV-row['FLUX_V']) < refComp:
+                              if isTargetUsable(row):
                                    refComp = abs(varMagV-row['FLUX_V'])
                                    refName=row['MAIN_ID']
 
                refRA, refDec, refID, refIDConv, refMagV = getStarData(refName if refName else None)
-               print(target)
+               #print(target)
                # Splits RA and Dec into hms and deg arcmin arcsec
+               varSplitRA = extractAngle(varRA)
+               varSplitDec = extractAngle(varDec)
+               print(f"Variable: {target}")
+               print(f"RA: {varSplitRA[0]}h{varSplitRA[1]}m{varSplitRA[2]}s")
+               print(f"Dec: {varSplitDec[0]}deg{varSplitDec[1]}`{varSplitDec[2]}``")
+
                refSplitRA = extractAngle(refRA)
                refSplitDec = extractAngle(refDec)
+               print(f"Reference: {refID}")
+               print(f"RA: {refSplitRA[0]}h{refSplitRA[1]}m{refSplitRA[2]}s")
+               print(f"Dec: {refSplitDec[0]}deg{refSplitDec[1]}`{refSplitDec[2]}``")
 
                # Populates the current row with current target's info
                varIDs.append(varID)
