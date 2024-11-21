@@ -25,9 +25,9 @@ def extractAngle(coordinates):
      else:
           return None, None, None
 
-star = "eta Aql"
-angFoVstr = "0d6m"
-angFoV = 6 # arcminutes
+star = "U Aql"
+angFoVstr = "0d4m"
+angFoV = 4 # arcminutes
 
 starTable = simbad.query_object(star)
 
@@ -41,21 +41,19 @@ surroundingsRA = []
 surroundingsDec = []
 surroundingsMag = []
 
-#print(surroundings["RA"], surroundings["DEC"])
-
 for i in surroundings:
     #print(i["MAIN_ID"])
         starLoc=getCenterCoords(i)
         surroundingsNames.append(i["MAIN_ID"])
         surroundingsRA.append(starLoc.ra.deg)
         surroundingsDec.append(starLoc.dec.deg)
-        print(i["FLUX_V"])
-        adjMag = 10/math.log(i["FLUX_V"])
-        surroundingsMag.append(pow(adjMag,2))
-#print(surroundings)
-#print(surroundingsNames)
 
-#print(f"\nMagnitude After Log:\n{surroundingsMag}")
+        if isinstance(i["FLUX_V"], np.float32):
+            adjMag = 10/math.log(i["FLUX_V"])     
+        else:
+            adjMag = 1
+        
+        surroundingsMag.append(pow(adjMag,2))
 
 raArray = np.array(surroundingsRA)
 
@@ -63,6 +61,8 @@ decArray = np.array(surroundingsDec)
 sizeArray = np.array(surroundingsMag)
 
 plt.scatter(raArray, decArray, s=sizeArray, color="black")
+
+
 
 plt.xlim(centerCoords.ra.deg+(angFoV/60),centerCoords.ra.deg-(angFoV/60))
 plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
