@@ -25,11 +25,11 @@ def extractAngle(coordinates):
      else:
           return None, None, None
 
-textOffset = 0.01
 star = "SY Cas"
 reference = "2MASS J00144120+5827154"
 angFoVstr = "0d8m"
 angFoV = 8 # arcminutes
+textOffset = angFoV/300
 
 starTable = simbad.query_object(star)
 referenceTable = simbad.query_object(reference)
@@ -67,10 +67,15 @@ sizeArray = np.array(surroundingsMag)
 
 plt.scatter(raArray, decArray, s=sizeArray, color="black")
 
-plt.annotate("Variable", [centerCoords.ra.deg, centerCoords.dec.deg], [centerCoords.ra.deg+textOffset, centerCoords.dec.deg+textOffset], arrowprops=dict(facecolor="black", headwidth=0.5, width=0.5, headlength=0.5))
-plt.annotate("Reference", [referenceCoords.ra.deg, referenceCoords.dec.deg], [referenceCoords.ra.deg+textOffset, referenceCoords.dec.deg+textOffset], arrowprops=dict(facecolor="black", headwidth=0.5, width=0.5, headlength=0.5))
+plt.annotate("Variable", [centerCoords.ra.deg, centerCoords.dec.deg], [centerCoords.ra.deg, centerCoords.dec.deg+textOffset], horizontalalignment='center', arrowprops=dict(arrowstyle='-'))
+plt.annotate("Reference", [referenceCoords.ra.deg, referenceCoords.dec.deg], [referenceCoords.ra.deg, referenceCoords.dec.deg+textOffset], horizontalalignment='center', arrowprops=dict(arrowstyle='-'))
 
+plt.title(star)
+
+plt.xlabel("RA (deg)")
 plt.xlim(centerCoords.ra.deg+(angFoV/60),centerCoords.ra.deg-(angFoV/60))
+
+plt.ylabel("Dec (deg)")
 plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
 
 plt.show()
