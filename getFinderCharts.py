@@ -2,6 +2,7 @@ import pandas as pd
 from astroquery.simbad import Simbad
 from astropy import units as u
 from astropy.coordinates import SkyCoord
+from astropy.coordinates import ICRS
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import numpy as np
@@ -31,10 +32,22 @@ def extractAngle(coordinates):
      else:
           return None, None, None
 
+# Input the RA component of a SkyCoord Object
+# Output the RA as a string in the hms format
+def deci2RA(skyCoordsRA):
+    formatCoordsRA = str(skyCoordsRA.hms.h)+"h"+str(skyCoordsRA.hms.m)+"m"+str(round(skyCoordsRA.hms.s, 2))+"s"
+    return formatCoordsRA
+
+# Input the Dec component of a SkyCoord Object
+# Output the Dec as a string in the dms format
+def deci2Dec(skyCoordsDec):
+    formatCoordsDec = str(skyCoordsDec.dms.d)+"deg"+str(skyCoordsDec.dms.m)+"'"+str(round(skyCoordsDec.dms.s, 1))+"\""
+    return formatCoordsDec
+
 # Manually input star and reference here
 
-star = "SY Cas"
-reference = "2MASS J00144120+5827154"
+star = "HIP 29022"
+reference = "2MASS_J06071375+1103512"
 
 # Manually input FoV here
 
@@ -119,7 +132,7 @@ ax.add_artist(scalebar)
 
 #plt.show()
 
-path = "FinderChartPNGs\\finder_"
-fileName = path+star.replace(" ", "_")
+#path = "FinderChartPNGs\\finder_"
+#fileName = path+star.replace(" ", "_")
 
-plt.savefig(fileName)
+#plt.savefig(fileName)
