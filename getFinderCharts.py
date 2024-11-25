@@ -3,6 +3,7 @@ from astroquery.simbad import Simbad
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import numpy as np
 import math
 
@@ -78,4 +79,13 @@ plt.xlim(centerCoords.ra.deg+(angFoV/60),centerCoords.ra.deg-(angFoV/60))
 plt.ylabel("Dec (deg)")
 plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
 
-plt.show()
+ax = plt.gca()
+scalebar = AnchoredSizeBar(ax.transData, 1/60, "1 minute", loc='lower left', pad=1, frameon=False)
+
+ax.add_artist(scalebar)
+
+#plt.show()
+path = "FinderChartPNGs\\finder_"
+fileName = path+star.replace(" ", "_")
+
+plt.savefig(fileName)
