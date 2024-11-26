@@ -4,6 +4,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import ICRS
 import matplotlib.pyplot as plt
+import matplotlib.axis as Axis
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import numpy as np
 import math
@@ -46,8 +47,8 @@ def deci2Dec(skyCoordsDec):
 
 # Manually input star and reference here
 
-star = "HIP 29022"
-reference = "2MASS_J06071375+1103512"
+star = "HD 236542"
+reference = "2MASS_J00500726+6009235"
 
 # Manually input FoV here
 
@@ -93,6 +94,8 @@ for i in surroundings:
     surroundingsRA.append(starLoc.ra.deg)
     surroundingsDec.append(starLoc.dec.deg)
     surroundingsMag.append(pow(adjMag,3))
+    #print(starLoc.ra.to_string(u.hourangle))
+    #print(starLoc.dec.to_string(u.degree))
 
 # Translates lists of star info into arrays to be plotted
 
@@ -100,8 +103,9 @@ raArray = np.array(surroundingsRA)
 decArray = np.array(surroundingsDec)
 sizeArray = np.array(surroundingsMag)
 
-# Plots the known stars in the field
 
+# Plots the known stars in the field
+fig, ax = plt.subplots()
 plt.scatter(raArray, decArray, s=sizeArray, color="black")
 
 # Labels both the variable and the reference star
@@ -115,22 +119,48 @@ plt.title(star)
 
 # Sets the axis labels and ranges
 
-plt.xlabel("RA (deg)")
+plt.xlabel("RA (hms)")
 plt.xlim(centerCoords.ra.deg+(angFoV/60),centerCoords.ra.deg-(angFoV/60))
 
-plt.ylabel("Dec (deg)")
+plt.ylabel("Dec (dms)")
 plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
+
 
 # Adds a scalebar to the figure
 
-ax = plt.gca()
-scalebar = AnchoredSizeBar(ax.transData, 1/60, "1 minute", loc='lower left', pad=1, frameon=False)
+#ax = plt.gca()
+scalebar = AnchoredSizeBar(ax.transData, 1/60, "1'", loc='lower left', pad=1, frameon=False)
 
 ax.add_artist(scalebar)
 
+# Reformats the values of axis ticks
+
+newXLabels = []
+xlocations, xlabels = plt.xticks()
+#print(xlocations)
+
+labels = [item.get_text() for item in ax.get_xticklabels()]
+labels = ax.get_xticks()
+for i in labels:
+    i=(SkyCoord(ra=i, dec=0, frame="icrs", unit=(u.deg))).ra.to_string(u.hourangle)
+    newXLabels.append(i)
+ax.set_xticks(xlocations, newXLabels, rotation='vertical', font=dict(size=8))
+
+newYLabels = []
+ylocations, ylabels = plt.yticks()
+
+labels = [item.get_text() for item in ax.get_yticklabels()]
+labels = ax.get_yticks()
+for i in labels:
+    i=(SkyCoord(ra=0, dec=i, frame="icrs", unit=(u.hourangle, u.deg))).dec.to_string(u.degree)
+    newYLabels.append(i)
+
+ax.set_yticks(ylocations, newYLabels, font=dict(size=8))
+
 # Either display or save image here (Comment out to exclude)
 
-#plt.show()
+plt.tight_layout()
+plt.show()
 
 #path = "FinderChartPNGs\\finder_"
 #fileName = path+star.replace(" ", "_")
