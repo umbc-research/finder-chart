@@ -45,124 +45,136 @@ def deci2Dec(skyCoordsDec):
     formatCoordsDec = str(skyCoordsDec.dms.d)+"deg"+str(skyCoordsDec.dms.m)+"'"+str(round(skyCoordsDec.dms.s, 1))+"\""
     return formatCoordsDec
 
-# Manually input star and reference here
 
-star = "HD 236542"
-reference = "2MASS_J00500726+6009235"
+# List of targets that need ID's and Reference Stars
+targetList = "SampleFinderChartList.csv"
 
-# Manually input FoV here
+inputDF = pd.read_csv(targetList)
+#print(commonVarNames)
+targList = []
 
-angFoVstr = "0d8m"
-angFoV = 8 # arcminutes
+for i in inputDF.itertuples():
+    targList.append(i[1:])
 
-# Set up vertical offset for labelling stars
-textOffset = angFoV/300
+for targ in targList:
+    # Manually input star and reference here
 
-starTable = simbad.query_object(star)
-referenceTable = simbad.query_object(reference)
+    star = targ[0]
+    reference = targ[1]
 
-centerCoords = getCenterCoords(starTable)
-referenceCoords = getCenterCoords(referenceTable)
+    # Manually input FoV here
 
-# Find stars in a given region
+    angFoVstr = "0d8m"
+    angFoV = 8 # arcminutes
 
-surroundings = simbad.query_region(centerCoords, angFoVstr)
+    # Set up vertical offset for labelling stars
+    textOffset = angFoV/300
 
- # Initialize star info lists
+    starTable = simbad.query_object(star)
+    referenceTable = simbad.query_object(reference)
 
-surroundingsTable = []
-surroundingsNames = []
-surroundingsRA = []
-surroundingsDec = []
-surroundingsMag = []
+    centerCoords = getCenterCoords(starTable)
+    referenceCoords = getCenterCoords(referenceTable)
 
-# Organize info of all stars into lists
+    # Find stars in a given region
 
-for i in surroundings:
-    starLoc=getCenterCoords(i)
+    surroundings = simbad.query_region(centerCoords, angFoVstr)
 
-    # If a star magnitude is known, scale it,
-    # Else, make the size of the point equal to 1
+    # Initialize star info lists
+
+    surroundingsTable = []
+    surroundingsNames = []
+    surroundingsRA = []
+    surroundingsDec = []
+    surroundingsMag = []
+
+    # Organize info of all stars into lists
+
+    for i in surroundings:
+        starLoc=getCenterCoords(i)
+
+        # If a star magnitude is known, scale it,
+        # Else, make the size of the point equal to 1
+            
+        if isinstance(i["FLUX_V"], np.float32):
+            adjMag = 5/math.log(i["FLUX_V"])     
+        else:
+            adjMag = 1
         
-    if isinstance(i["FLUX_V"], np.float32):
-        adjMag = 5/math.log(i["FLUX_V"])     
-    else:
-        adjMag = 1
-    
-    # Initializes lists of info
-    surroundingsNames.append(i["MAIN_ID"])
-    surroundingsRA.append(starLoc.ra.deg)
-    surroundingsDec.append(starLoc.dec.deg)
-    surroundingsMag.append(pow(adjMag,3))
-    #print(starLoc.ra.to_string(u.hourangle))
-    #print(starLoc.dec.to_string(u.degree))
+        # Initializes lists of info
+        surroundingsNames.append(i["MAIN_ID"])
+        surroundingsRA.append(starLoc.ra.deg)
+        surroundingsDec.append(starLoc.dec.deg)
+        surroundingsMag.append(pow(adjMag,3))
+        #print(starLoc.ra.to_string(u.hourangle))
+        #print(starLoc.dec.to_string(u.degree))
 
-# Translates lists of star info into arrays to be plotted
+    # Translates lists of star info into arrays to be plotted
 
-raArray = np.array(surroundingsRA)
-decArray = np.array(surroundingsDec)
-sizeArray = np.array(surroundingsMag)
+    raArray = np.array(surroundingsRA)
+    decArray = np.array(surroundingsDec)
+    sizeArray = np.array(surroundingsMag)
 
 
-# Plots the known stars in the field
-fig, ax = plt.subplots()
-plt.scatter(raArray, decArray, s=sizeArray, color="black")
+    # Plots the known stars in the field
+    fig, ax = plt.subplots()
+    plt.scatter(raArray, decArray, s=sizeArray, color="black")
 
-# Labels both the variable and the reference star
+    # Labels both the variable and the reference star
 
-plt.annotate("Variable", [centerCoords.ra.deg, centerCoords.dec.deg], [centerCoords.ra.deg, centerCoords.dec.deg+textOffset], horizontalalignment='center', arrowprops=dict(arrowstyle='-'))
-plt.annotate("Reference", [referenceCoords.ra.deg, referenceCoords.dec.deg], [referenceCoords.ra.deg, referenceCoords.dec.deg+textOffset], horizontalalignment='center', arrowprops=dict(arrowstyle='-'))
+    plt.annotate("Variable", [centerCoords.ra.deg, centerCoords.dec.deg], [centerCoords.ra.deg, centerCoords.dec.deg+textOffset], horizontalalignment='center', arrowprops=dict(arrowstyle='-'))
+    plt.annotate("Reference", [referenceCoords.ra.deg, referenceCoords.dec.deg], [referenceCoords.ra.deg, referenceCoords.dec.deg+textOffset], horizontalalignment='center', arrowprops=dict(arrowstyle='-'))
 
-# Sets the figure Title to the name of the Variable Star 
+    # Sets the figure Title to the name of the Variable Star 
 
-plt.title(star)
+    plt.title(star)
 
-# Sets the axis labels and ranges
+    # Sets the axis labels and ranges
 
-plt.xlabel("RA (hms)")
-plt.xlim(centerCoords.ra.deg+(angFoV/60),centerCoords.ra.deg-(angFoV/60))
+    plt.xlabel("RA (hms)")
+    plt.xlim(centerCoords.ra.deg+(angFoV/60),centerCoords.ra.deg-(angFoV/60))
 
-plt.ylabel("Dec (dms)")
-plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
+    plt.ylabel("Dec (dms)")
+    plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
 
 
-# Adds a scalebar to the figure
+    # Adds a scalebar to the figure
 
-#ax = plt.gca()
-scalebar = AnchoredSizeBar(ax.transData, 1/60, "1'", loc='lower left', pad=1, frameon=False)
+    #ax = plt.gca()
+    scalebar = AnchoredSizeBar(ax.transData, 1/60, "1'", loc='lower left', pad=1, frameon=False)
 
-ax.add_artist(scalebar)
+    ax.add_artist(scalebar)
 
-# Reformats the values of axis ticks
+    # Reformats the values of axis ticks
 
-newXLabels = []
-xlocations, xlabels = plt.xticks()
-#print(xlocations)
+    newXLabels = []
+    xlocations, xlabels = plt.xticks()
+    #print(xlocations)
 
-labels = [item.get_text() for item in ax.get_xticklabels()]
-labels = ax.get_xticks()
-for i in labels:
-    i=(SkyCoord(ra=i, dec=0, frame="icrs", unit=(u.deg))).ra.to_string(u.hourangle)
-    newXLabels.append(i)
-ax.set_xticks(xlocations, newXLabels, rotation='vertical', font=dict(size=8))
+    labels = [item.get_text() for item in ax.get_xticklabels()]
+    labels = ax.get_xticks()
+    for i in labels:
+        i=(SkyCoord(ra=i, dec=0, frame="icrs", unit=(u.deg))).ra.to_string(u.hourangle)
+        newXLabels.append(i)
+    ax.set_xticks(xlocations, newXLabels, rotation='vertical', font=dict(size=8))
 
-newYLabels = []
-ylocations, ylabels = plt.yticks()
+    newYLabels = []
+    ylocations, ylabels = plt.yticks()
 
-labels = [item.get_text() for item in ax.get_yticklabels()]
-labels = ax.get_yticks()
-for i in labels:
-    i=(SkyCoord(ra=0, dec=i, frame="icrs", unit=(u.hourangle, u.deg))).dec.to_string(u.degree)
-    newYLabels.append(i)
+    labels = [item.get_text() for item in ax.get_yticklabels()]
+    labels = ax.get_yticks()
+    for i in labels:
+        i=(SkyCoord(ra=0, dec=i, frame="icrs", unit=(u.hourangle, u.deg))).dec.to_string(u.degree)
+        newYLabels.append(i)
 
-ax.set_yticks(ylocations, newYLabels, font=dict(size=8))
+    ax.set_yticks(ylocations, newYLabels, font=dict(size=8))
 
-# Either display or save image here (Comment out to exclude)
+    # Either display or save image here (Comment out to exclude)
 
-plt.tight_layout()
-plt.show()
+    plt.tight_layout()
+    #plt.show()
 
-#path = "FinderChartPNGs\\finder_"
-#fileName = path+star.replace(" ", "_")
+    path = "FinderChartPNGs\\finder_"
+    fileName = path+star.replace(" ", "_")
 
-#plt.savefig(fileName)
+    plt.savefig(fileName)
