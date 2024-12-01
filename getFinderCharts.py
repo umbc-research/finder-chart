@@ -129,15 +129,7 @@ for targ in targList:
 
     plt.title(star)
 
-    # Sets the axis labels and ranges
 
-    plt.xlabel("RA (hms)")
-    plt.xlim(centerCoords.ra.deg+(angFoV/60),centerCoords.ra.deg-(angFoV/60))
-
-    plt.ylabel("Dec (dms)")
-    plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
-    # Set the aspect ratio to 1:1
-    plt.gca().set_aspect(1)
 
     # Adds a scalebar to the figure
 
@@ -169,6 +161,16 @@ for targ in targList:
         newYLabels.append(i)
 
     ax.set_yticks(ylocations, newYLabels, font=dict(size=8))
+    
+    # Sets the axis labels and ranges
+
+    plt.xlabel("RA (hms)")
+    plt.xlim(centerCoords.ra.deg+(angFoV/60),centerCoords.ra.deg-(angFoV/60))
+
+    plt.ylabel("Dec (dms)")
+    plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
+    # Set the aspect ratio to 1:1
+    plt.gca().set_aspect(1)
 
     # Either display or save image here (Comment out to exclude)
 
