@@ -4,7 +4,7 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import ICRS
 import matplotlib.pyplot as plt
-import matplotlib.axis as Axis
+import matplotlib.axes as Axis
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import numpy as np
 import math
@@ -47,7 +47,7 @@ def deci2Dec(skyCoordsDec):
 
 
 # List of targets that need ID's and Reference Stars
-targetList = "SampleFinderChartList.csv"
+targetList = "FinderChartList.csv"
 
 inputDF = pd.read_csv(targetList)
 #print(commonVarNames)
@@ -136,7 +136,8 @@ for targ in targList:
 
     plt.ylabel("Dec (dms)")
     plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
-
+    # Set the aspect ratio to 1:1
+    plt.gca().set_aspect(1)
 
     # Adds a scalebar to the figure
 
@@ -178,3 +179,4 @@ for targ in targList:
     fileName = path+star.replace(" ", "_")
 
     plt.savefig(fileName)
+    plt.close()
