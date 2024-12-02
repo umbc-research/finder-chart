@@ -98,8 +98,9 @@ for targ in targList:
     # Sets the figure Title to the name of the Variable Star 
 
     plt.title(star)
+    
 
-
+    plt.legend(loc='lower right', frameon=False, fontsize=12, title=f'FoV: {angFoV*2}\'x{angFoV*2}\'')
 
     # Adds a scalebar to the figure
 
@@ -107,6 +108,7 @@ for targ in targList:
     scalebar = AnchoredSizeBar(ax.transData, 1/60, "1'", loc='lower left', pad=1, frameon=False)
 
     ax.add_artist(scalebar)
+
 
     # Reformats the values of axis ticks
     
