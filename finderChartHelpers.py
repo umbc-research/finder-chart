@@ -32,7 +32,7 @@ def deci2RA(skyCoordsRA):
 # Input the Dec component of a SkyCoord Object
 # Output the Dec as a string in the dms format
 def deci2Dec(skyCoordsDec):
-    formatCoordsDec = r'{:d}$^\circ$'.format(int(skyCoordsDec.dms.d)) + "{:d}'".format(int(skyCoordsDec.dms.m)) +  '{:d}"'.format(int(skyCoordsDec.dms.s))
+    formatCoordsDec = r'{:d}$^\circ$'.format(int(skyCoordsDec.dms.d)) + "{:d}'".format(int(skyCoordsDec.dms.m)) +  '{:0.1f}"'.format(skyCoordsDec.dms.s[0])
     return formatCoordsDec
 
 def getLocations(halfFoVmin, startingTick, coordsSystem):
