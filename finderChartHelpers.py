@@ -26,13 +26,13 @@ def extractAngle(coordinates):
 # Input the RA component of a SkyCoord Object
 # Output the RA as a string in the hms format
 def deci2RA(skyCoordsRA):
-    formatCoordsRA = str(skyCoordsRA.hms.h)+"h"+str(skyCoordsRA.hms.m)+"m"+str(round(skyCoordsRA.hms.s, 2))+"s"
+    formatCoordsRA = r'${:d}^h {:d}^m {:0.2f}^s$'.format(int(skyCoordsRA.hms.h), int(skyCoordsRA.hms.m), round(skyCoordsRA.hms.s, 2))
     return formatCoordsRA
 
 # Input the Dec component of a SkyCoord Object
 # Output the Dec as a string in the dms format
 def deci2Dec(skyCoordsDec):
-    formatCoordsDec = str(skyCoordsDec.dms.d)+"deg"+str(skyCoordsDec.dms.m)+"'"+str(round(skyCoordsDec.dms.s, 1))+"\""
+    formatCoordsDec = r'{:d}$^\circ$'.format(int(skyCoordsDec.dms.d)) + "{:d}'".format(int(skyCoordsDec.dms.m)) +  '{:d}"'.format(int(skyCoordsDec.dms.s))
     return formatCoordsDec
 
 def getLocations(halfFoVmin, startingTick, coordsSystem):
