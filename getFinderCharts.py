@@ -9,42 +9,10 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import numpy as np
 import math
 
+from finderChartHelpers import *
+
 simbad=Simbad()
 simbad.add_votable_fields("flux(V)")
-
-# Input a Simbad object from simbad.query_object
-# Output a SkyCoord object
-def getCenterCoords(objTable=None):
-    objRA, objDec = objTable["RA"], objTable["DEC"]
-    center = SkyCoord(objRA, objDec, frame="icrs", unit=(u.hourangle, u.deg))
-    return center
-
-
-# Input coordinates in string of format (+deg ' '')
-# Output each individual coordinate as its own variable
-def extractAngle(coordinates):
-     coordSeparated = [ang.strip() for ang in coordinates.split(' ')]
-
-     # Removes "+" from Dec degrees (Prevents equations in Google Sheets)
-     decSoln = coordSeparated[0].replace("+", "")
-
-     if len(coordSeparated) == 3:
-          return decSoln, coordSeparated[1], coordSeparated[2]
-     else:
-          return None, None, None
-
-# Input the RA component of a SkyCoord Object
-# Output the RA as a string in the hms format
-def deci2RA(skyCoordsRA):
-    formatCoordsRA = str(skyCoordsRA.hms.h)+"h"+str(skyCoordsRA.hms.m)+"m"+str(round(skyCoordsRA.hms.s, 2))+"s"
-    return formatCoordsRA
-
-# Input the Dec component of a SkyCoord Object
-# Output the Dec as a string in the dms format
-def deci2Dec(skyCoordsDec):
-    formatCoordsDec = str(skyCoordsDec.dms.d)+"deg"+str(skyCoordsDec.dms.m)+"'"+str(round(skyCoordsDec.dms.s, 1))+"\""
-    return formatCoordsDec
-
 
 # List of targets that need ID's and Reference Stars
 targetList = "FinderChartList.csv"
@@ -106,8 +74,8 @@ for targ in targList:
         surroundingsRA.append(starLoc.ra.deg)
         surroundingsDec.append(starLoc.dec.deg)
         surroundingsMag.append(pow(adjMag,3))
-        #print(starLoc.ra.to_string(u.hourangle))
-        #print(starLoc.dec.to_string(u.degree))
+      
+
 
     # Translates lists of star info into arrays to be plotted
 
@@ -139,6 +107,27 @@ for targ in targList:
     ax.add_artist(scalebar)
 
     # Reformats the values of axis ticks
+    
+    
+    print(centerCoords.dec.deg)
+
+    halfFoVasSkyCoord=SkyCoord(ra=0, dec=angFoV/60, frame="icrs", unit=u.deg)
+    startTick = SkyCoord(ra=0, dec=centerCoords.dec.deg-halfFoVasSkyCoord.dec.deg, frame="icrs", unit=u.deg)
+    
+    print(f"{startTick.dec.deg} is the starting point")
+    print(f"{startTick.dec.to_string(u.degree)}")
+    #i=(SkyCoord(ra=i, dec=0, frame="icrs", unit=(u.deg))).ra.to_string(u.hourangle)
+    
+    #print(getLocations(angFoV, starLoc.dec.deg, "DEC"))
+    yLocs = []
+    yLocsStr = []
+    for tick in getLocations(angFoV, startTick, "DEC"):
+        strTick = SkyCoord(ra=0, dec=tick, frame="icrs", unit=u.deg).dec.to_string(u.degree)
+        yLocs.append(tick)
+        yLocsStr.append(strTick)
+        #print(tick)
+        print(strTick)
+
 
     newXLabels = []
     xlocations, xlabels = plt.xticks()
@@ -160,7 +149,7 @@ for targ in targList:
         i=(SkyCoord(ra=0, dec=i, frame="icrs", unit=(u.hourangle, u.deg))).dec.to_string(u.degree)
         newYLabels.append(i)
 
-    ax.set_yticks(ylocations, newYLabels, font=dict(size=8))
+    ax.set_yticks(yLocs, yLocsStr, font=dict(size=8))
     
     # Sets the axis labels and ranges
 
@@ -175,10 +164,10 @@ for targ in targList:
     # Either display or save image here (Comment out to exclude)
 
     plt.tight_layout()
-    #plt.show()
+    plt.show()
 
     path = "FinderChartPNGs\\finder_"
     fileName = path+star.replace(" ", "_")
 
-    plt.savefig(fileName)
+    #plt.savefig(fileName)
     plt.close()
