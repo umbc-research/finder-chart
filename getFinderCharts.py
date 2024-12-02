@@ -9,6 +9,8 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import numpy as np
 import math
 
+from sys import exit
+
 from finderChartHelpers import *
 
 simbad=Simbad()
@@ -85,7 +87,7 @@ for targ in targList:
 
 
     # Plots the known stars in the field
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8,8))
     plt.scatter(raArray, decArray, s=sizeArray, color="black")
 
     # Labels both the variable and the reference star
@@ -122,12 +124,10 @@ for targ in targList:
     yLocs = []
     yLocsStr = []
     for tick in getLocations(angFoV, startTick, "DEC"):
-        strTick = SkyCoord(ra=0, dec=tick, frame="icrs", unit=u.deg).dec.to_string(u.degree)
-        yLocs.append(tick)
+        strTick = deci2Dec(SkyCoord(ra=0, dec=tick, frame="icrs", unit=u.deg).dec)
+        yLocs.append(tick[0])
         yLocsStr.append(strTick)
         #print(tick)
-        print(strTick)
-
 
     newXLabels = []
     xlocations, xlabels = plt.xticks()
@@ -136,20 +136,17 @@ for targ in targList:
     labels = [item.get_text() for item in ax.get_xticklabels()]
     labels = ax.get_xticks()
     for i in labels:
-        i=(SkyCoord(ra=i, dec=0, frame="icrs", unit=(u.deg))).ra.to_string(u.hourangle)
+        i=deci2RA((SkyCoord(ra=i, dec=0, frame="icrs", unit=(u.deg))).ra)
         newXLabels.append(i)
-    ax.set_xticks(xlocations, newXLabels, rotation='vertical', font=dict(size=8))
+    ax.set_xticks(xlocations, newXLabels, rotation=75, font=dict(size=10))
 
     newYLabels = []
     ylocations, ylabels = plt.yticks()
 
     labels = [item.get_text() for item in ax.get_yticklabels()]
     labels = ax.get_yticks()
-    for i in labels:
-        i=(SkyCoord(ra=0, dec=i, frame="icrs", unit=(u.hourangle, u.deg))).dec.to_string(u.degree)
-        newYLabels.append(i)
-
-    ax.set_yticks(yLocs, yLocsStr, font=dict(size=8))
+    
+    ax.set_yticks(yLocs, yLocsStr, font=dict(size=10))
     
     # Sets the axis labels and ranges
 
@@ -162,7 +159,7 @@ for targ in targList:
     plt.gca().set_aspect(1)
 
     # Either display or save image here (Comment out to exclude)
-
+    plt.grid(1, alpha=0.7)
     plt.tight_layout()
     plt.show()
 
