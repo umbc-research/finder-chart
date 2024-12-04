@@ -26,13 +26,13 @@ def extractAngle(coordinates):
 # Input the RA component of a SkyCoord Object
 # Output the RA as a string in the hms format
 def deci2RA(skyCoordsRA):
-    formatCoordsRA = r'${:d}^h {:d}^m {:0.2f}^s$'.format(int(skyCoordsRA.hms.h), int(skyCoordsRA.hms.m), round(skyCoordsRA.hms.s, 2))
+    formatCoordsRA = r'${:02d}^h {:02d}^m {:0.2f}^s$'.format(int(skyCoordsRA.hms.h), int(skyCoordsRA.hms.m), float(skyCoordsRA.hms.s))
     return formatCoordsRA
 
 # Input the Dec component of a SkyCoord Object
 # Output the Dec as a string in the dms format
 def deci2Dec(skyCoordsDec):
-    formatCoordsDec = r'{:d}$^\circ$'.format(int(skyCoordsDec.dms.d)) + "{:d}'".format(int(skyCoordsDec.dms.m)) +  '{:0.1f}"'.format(skyCoordsDec.dms.s[0])
+    formatCoordsDec = r'{:02d}$^\circ$'.format(int(skyCoordsDec.dms.d)) + "{:02d}'".format(int(skyCoordsDec.dms.m)) +  '{:0.1f}"'.format(skyCoordsDec.dms.s[0])
     return formatCoordsDec
 
 def getLocations(halfFoVmin, startingTick, coordsSystem):
@@ -45,11 +45,11 @@ def getLocations(halfFoVmin, startingTick, coordsSystem):
     counter = 0
     if(coordsSystem == "RA"):
         while counter <= halfFoVmin:
-            locations.append(startingTick.ra.deg + 1/30)
+            locations.append(startingTick.ra.deg + counter/30)
             counter = counter + 1
 
     if(coordsSystem == "DEC"):
-            while counter < halfFoVmin:
+            while counter <= halfFoVmin:
                 locations.append(startingTick.dec.deg + counter/30)
                 counter = counter + 1
 

@@ -38,7 +38,10 @@ for targ in targList:
     angFoV = 8 # arcminutes
 
     # Set up vertical offset for labelling stars
+
     textOffset = angFoV/300
+
+    # Gather coordinates for variable and reference stars
 
     starTable = simbad.query_object(star)
     referenceTable = simbad.query_object(reference)
@@ -67,7 +70,7 @@ for targ in targList:
         # Else, make the size of the point equal to 1
             
         if isinstance(i["FLUX_V"], np.float32):
-            adjMag = 5/math.log(i["FLUX_V"])     
+            adjMag = 4/pow(math.log(i["FLUX_V"]), 0.5)     
         else:
             adjMag = 1
         
@@ -77,8 +80,6 @@ for targ in targList:
         surroundingsDec.append(starLoc.dec.deg)
         surroundingsMag.append(pow(adjMag,3))
       
-
-
     # Translates lists of star info into arrays to be plotted
 
     raArray = np.array(surroundingsRA)
@@ -87,7 +88,9 @@ for targ in targList:
 
 
     # Plots the known stars in the field
+
     fig, ax = plt.subplots(figsize=(8,8))
+    
     plt.scatter(raArray, decArray, s=sizeArray, color="black")
 
     # Labels both the variable and the reference star
@@ -99,50 +102,46 @@ for targ in targList:
 
     plt.title(star)
     
-
-    plt.legend(loc='lower right', frameon=False, fontsize=12, title=f'FoV: {angFoV*2}\'x{angFoV*2}\'')
-
     # Adds a scalebar to the figure
 
-    #ax = plt.gca()
     scalebar = AnchoredSizeBar(ax.transData, 1/60, "1'", loc='lower left', pad=1, frameon=False)
 
     ax.add_artist(scalebar)
 
+    plt.legend([], [], loc='lower right', frameon=False, fontsize=12, title=f'FoV: {angFoV*2}\'x{angFoV*2}\'')
 
     # Reformats the values of axis ticks
-    
-    
-    print(centerCoords.dec.deg)
 
-    halfFoVasSkyCoord=SkyCoord(ra=0, dec=angFoV/60, frame="icrs", unit=u.deg)
-    startTick = SkyCoord(ra=0, dec=centerCoords.dec.deg-halfFoVasSkyCoord.dec.deg, frame="icrs", unit=u.deg)
+    halfFoVSkyCoordX=SkyCoord(ra=angFoV/60, dec=0, frame="icrs", unit=u.deg)
+    startTickX = SkyCoord(ra=centerCoords.ra.deg-halfFoVSkyCoordX.ra.deg, dec=0, frame="icrs", unit=u.deg)
     
-    print(f"{startTick.dec.deg} is the starting point")
-    print(f"{startTick.dec.to_string(u.degree)}")
-    #i=(SkyCoord(ra=i, dec=0, frame="icrs", unit=(u.deg))).ra.to_string(u.hourangle)
-    
-    #print(getLocations(angFoV, starLoc.dec.deg, "DEC"))
-    yLocs = []
-    yLocsStr = []
-    for tick in getLocations(angFoV, startTick, "DEC"):
-        strTick = deci2Dec(SkyCoord(ra=0, dec=tick, frame="icrs", unit=u.deg).dec)
-        yLocs.append(tick[0])
-        yLocsStr.append(strTick)
-        #print(tick)
+    # Reformats the tick labels of the x-axis (RA)
+    xLocs = []
+    xLocsStr = []
+    for tick in getLocations(angFoV, startTickX, "RA"):
+        strTick = deci2RA(SkyCoord(ra=tick, dec=0, frame="icrs", unit=u.deg).ra)
+        xLocs.append(tick[0])
+        xLocsStr.append(strTick)
 
-    newXLabels = []
     xlocations, xlabels = plt.xticks()
-    #print(xlocations)
 
     labels = [item.get_text() for item in ax.get_xticklabels()]
     labels = ax.get_xticks()
-    for i in labels:
-        i=deci2RA((SkyCoord(ra=i, dec=0, frame="icrs", unit=(u.deg))).ra)
-        newXLabels.append(i)
-    ax.set_xticks(xlocations, newXLabels, rotation=75, font=dict(size=10))
+    
+    ax.set_xticks(xLocs, xLocsStr, rotation=60, font=dict(size=10))
 
-    newYLabels = []
+    # Reformats the tick labels of the y-axis (Dec)
+
+    halfFoVSkyCoordY=SkyCoord(ra=0, dec=angFoV/60, frame="icrs", unit=u.deg)
+    startTickY = SkyCoord(ra=0, dec=centerCoords.dec.deg-halfFoVSkyCoordY.dec.deg, frame="icrs", unit=u.deg)
+    
+    yLocs = []
+    yLocsStr = []
+    for tick in getLocations(angFoV, startTickY, "DEC"):
+        strTick = deci2Dec(SkyCoord(ra=0, dec=tick, frame="icrs", unit=u.deg).dec)
+        yLocs.append(tick[0])
+        yLocsStr.append(strTick)
+
     ylocations, ylabels = plt.yticks()
 
     labels = [item.get_text() for item in ax.get_yticklabels()]
@@ -157,16 +156,19 @@ for targ in targList:
 
     plt.ylabel("Dec (dms)")
     plt.ylim(centerCoords.dec.deg-(angFoV/60), centerCoords.dec.deg+(angFoV/60))
+    
     # Set the aspect ratio to 1:1
     plt.gca().set_aspect(1)
 
-    # Either display or save image here (Comment out to exclude)
     plt.grid(1, alpha=0.7)
     plt.tight_layout()
-    plt.show()
+    
+    # Either display or save image here (Comment out to exclude)
+    
+    #plt.show() # USE THIS TO SEE EACH PLOT
 
     path = "FinderChartPNGs\\finder_"
     fileName = path+star.replace(" ", "_")
 
-    #plt.savefig(fileName)
+    plt.savefig(fileName) # USE THIS TO SEE EACH PLOT
     plt.close()
